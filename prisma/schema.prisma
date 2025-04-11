@@ -15,6 +15,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  role          Role            @default(USER)
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
@@ -22,6 +23,14 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Ebook     Ebook[]
+}
+
+enum Role {
+  USER
+  BEGINNER
+  PRO
+  ADMIN
 }
 
 model Account {
@@ -83,4 +92,31 @@ model Feedback {
   id        String   @id @default(cuid())
   feedback  String
   createdAt DateTime @default(now())
+}
+
+model Ebook {
+  id             String           @id @default(cuid())
+  title          String
+  description    String
+  category       String?
+  length         String?
+  targetAudience String?
+  content        String
+  // coverImage     String? // URL ou chemin vers l'image
+  pdfUrl         String?
+  status         StatusGeneration @default(pending)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  userId         String
+  user           User             @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum StatusGeneration {
+  pending
+  in_progress
+  completed
+  error
 }

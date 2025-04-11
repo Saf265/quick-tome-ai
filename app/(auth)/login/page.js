@@ -21,8 +21,8 @@ export default function LoginPage() {
             alt="habitleaf logo"
             className="mb-2"
           />
-          <CardTitle>Log in</CardTitle>
-          <CardDescription>Log in to continue</CardDescription>
+          <CardTitle className="text-xl">Se connecter</CardTitle>
+          <CardDescription>Connectez-cous pour continuer</CardDescription>
         </CardHeader>
         <CardContent className="space-y-7 flex flex-col items-center justify-center w-full">
           <OAuthButtons />
