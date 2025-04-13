@@ -5,7 +5,7 @@ import { logger } from "../logger";
 
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
+  apiKey: process.env.OPENROUTER_API_KEY || "",
   defaultHeaders: {
     "HTTP-Referer": "http://localhost:3000", // Optional. Site URL for rankings on openrouter.ai.
     "X-Title": "QuickTome - AI", // Optional. Site title for rankings on openrouter.ai.
@@ -14,6 +14,13 @@ const openai = new OpenAI({
 
 export const generateContent = async (prompt) => {
   try {
+    if (!process.env.OPENROUTER_API_KEY) {
+      logger.error(
+        "OPENROUTER_API_KEY is not defined in environment variables"
+      );
+      throw new Error("OpenRouter API key is missing");
+    }
+
     const completion = await openai.chat.completions.create({
       model: "openai/gpt-3.5-turbo",
       messages: [
@@ -27,18 +34,14 @@ export const generateContent = async (prompt) => {
         },
         {
           role: "user",
-          content: `
-          Je veux que tu génères un contenu sur: ${prompt}
-          Voici les détails nécessaires:
-          - Format: Markdown avec titres ## et listes
-          - Longueur: au moins 3 paragraphes
-          - Style: professionnel mais accessible
-          `,
+          content: prompt,
         },
       ],
       temperature: 0.7, // Ajoutez pour plus de créativité
       max_tokens: 1000, // Forcez une réponse plus longue
     });
+
+    logger.debug("Received response from OpenRouter");
 
     logger.debug("Completion:", completion.choices[0].message);
 

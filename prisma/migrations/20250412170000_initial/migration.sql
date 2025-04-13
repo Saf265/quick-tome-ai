@@ -1,3 +1,9 @@
+-- CreateEnum
+CREATE TYPE "Role" AS ENUM ('USER', 'STARTER', 'PRO', 'ADMIN');
+
+-- CreateEnum
+CREATE TYPE "StatusGeneration" AS ENUM ('pending', 'in_progress', 'completed', 'error');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -5,6 +11,8 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
+    "role" "Role" NOT NULL DEFAULT 'USER',
+    "hasAccess" BOOLEAN NOT NULL DEFAULT false,
     "stripeCustomerId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -72,6 +80,24 @@ CREATE TABLE "Feedback" (
     CONSTRAINT "Feedback_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "Ebook" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "category" TEXT,
+    "length" TEXT,
+    "targetAudience" TEXT,
+    "content" TEXT NOT NULL,
+    "pdfUrl" TEXT,
+    "status" "StatusGeneration" NOT NULL DEFAULT 'pending',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "userId" TEXT NOT NULL,
+
+    CONSTRAINT "Ebook_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -81,6 +107,12 @@ CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 -- CreateIndex
 CREATE UNIQUE INDEX "Authenticator_credentialID_key" ON "Authenticator"("credentialID");
 
+-- CreateIndex
+CREATE INDEX "Ebook_userId_idx" ON "Ebook"("userId");
+
+-- CreateIndex
+CREATE INDEX "Ebook_status_idx" ON "Ebook"("status");
+
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -89,3 +121,6 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Authenticator" ADD CONSTRAINT "Authenticator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Ebook" ADD CONSTRAINT "Ebook_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

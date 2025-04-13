@@ -1,7 +1,10 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { auth } from "@/lib/auth";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Header() {
+export default async function Header() {
+  const session = await auth();
   const items = [
     {
       name: "Fonctionnalités",
@@ -44,12 +47,19 @@ export default function Header() {
             </Link>
           ))}
         </nav>
-        <Link
-          href="/login"
-          className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Connexion
-        </Link>
+        {session?.user && session?.user?.id ? (
+          <Avatar>
+            <AvatarImage src={session?.user?.image || ""} />
+            <AvatarFallback>{session?.user?.name[0] ?? ""}</AvatarFallback>
+          </Avatar>
+        ) : (
+          <Link
+            href="/login"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Connexion
+          </Link>
+        )}
       </div>
     </header>
   );

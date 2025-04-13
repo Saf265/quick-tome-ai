@@ -1,3 +1,8 @@
+import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
+import { stripe } from "@/lib/stripe";
+import { plansItems } from "@/utils/plan";
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 export async function POST(req) {
@@ -5,6 +10,7 @@ export async function POST(req) {
   const signature = req.headers.get("Stripe-Signature");
 
   let event;
+  let data;
 
   try {
     event = Stripe.webhooks.constructEvent(
@@ -16,23 +22,56 @@ export async function POST(req) {
     return new NextResponse(`Webhook Error: ${error}`, { status: 400 });
   }
 
-  const session = event.data.object;
-  const userId = session?.metadata?.userId;
+  data = event.data;
+  logger.info("Started processing Stripe webhook event");
 
-  if (event.type === "checkout.session.completed") {
-    if (!userId) {
-      return new NextResponse("Webhook Error: Missing metadata", {
-        status: 400,
+  switch (event.type) {
+    case "checkout.session.completed":
+      const session = await stripe.checkout.sessions.retrieve(data.object.id, {
+        expand: ["line_items"],
       });
-    }
+      logger.info("session", session ? "session exist" : "session not exist");
+      const customerId = session.customer;
+      logger.info("customerId", customerId);
+      const customer = await stripe.customers.retrieve(customerId);
 
-    //! edit this
-  } else {
-    console.log(`Unhandled event type ${event.type}`);
-    return new NextResponse(
-      `Webhook Error: Unsupported event type ${event.type}`,
-      { status: 200 }
-    );
+      const priceId = session.line_items.data[0].price.id;
+      logger.info("priceId", priceId);
+      logger.debug("plansItems", JSON.stringify(plansItems));
+      const plan = plansItems.find((plan) => plan.priceId === priceId);
+      logger.info("plan", plan ? "plan exist" : "plan not exist");
+
+      if (!plan) break;
+
+      await prisma.user.update({
+        where: {
+          email: customer.email,
+        },
+        data: {
+          role: plan.role.toUpperCase(),
+          hasAccess: true,
+        },
+        select: null,
+      });
+
+      break;
+    case "customer.subscription.deleted":
+      const subscription = await stripe.subscriptions.retrieve(data.object.id);
+
+      await prisma.user.update({
+        where: {
+          stripeCustomerId: subscription.customer,
+        },
+        data: {
+          role: "USER",
+          hasAccess: false,
+        },
+        select: null,
+      });
+
+      break;
+    default:
+      console.log(`Unhandled event type ${event.type}`);
   }
 
   return new NextResponse(null, { status: 200 });

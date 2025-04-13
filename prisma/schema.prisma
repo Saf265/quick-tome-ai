@@ -15,7 +15,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
-  role          Role            @default(USER)
+  role          String          @default("USER")
+  hasAccess     Boolean         @default(false)
   // Optional for WebAuthn support
   Authenticator Authenticator[]
 
@@ -24,13 +25,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   Ebook     Ebook[]
-}
-
-enum Role {
-  USER
-  BEGINNER
-  PRO
-  ADMIN
 }
 
 model Account {
@@ -95,28 +89,63 @@ model Feedback {
 }
 
 model Ebook {
-  id             String           @id @default(cuid())
-  title          String
-  description    String
-  category       String?
-  length         String?
-  targetAudience String?
-  content        String
-  // coverImage     String? // URL ou chemin vers l'image
-  pdfUrl         String?
-  status         StatusGeneration @default(pending)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  userId         String
-  user           User             @relation(fields: [userId], references: [id])
+  id    String @id @default(cuid())
+  title String
+
+  legnth      String
+  publicCible String
+  theme       String
+  description String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  at DateTime @default(now())
+
+  content        EbookContent @relation(fields: [ebookContentId], references: [id])
+  // status StatusGeneration @default(in_progress)
+  ebookContentId String
 
   @@index([userId])
-  @@index([status])
 }
 
-enum StatusGeneration {
-  pending
-  in_progress
-  completed
-  error
+model EbookContent {
+  id    String              @id @default(cuid())
+  intro EbookContentSection @relation(fields: [ebookContentSectionId], references: [id])
+
+  chapters EbookContentSection[]
+
+  conclusion EbookContentSection @relation(fields: [ebookContentSectionId], references: [id])
+
+  Ebook Ebook[]
 }
+
+model EbookContentSection {
+  id             String        @id @default(cuid())
+  name           String
+  content        String
+  EbookContent   EbookContent? @relation(fields: [ebookContentId], references: [id])
+  ebookContentId String?
+}
+
+// enum StatusGeneration {
+//   in_progress
+//   completed
+//   error
+// }
+
+// model Subscription {
+//   id String @id @default(cuid())
+
+//   customerId String
+//   customer   User   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+//   status     String
+
+//   // userId String
+//   // user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   planType String
+
+//   expirationDate DateTime
+//   at             DateTime @default(now())
+// }

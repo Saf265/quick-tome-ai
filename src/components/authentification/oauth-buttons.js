@@ -8,7 +8,7 @@ function OAuthButtons() {
   return (
     <div className="flex flex-col gap-2 w-full">
       <Button
-        onClick={() => signIn("google", { redirectTo: "/dashboard" })}
+        onClick={() => signIn("google", { redirectTo: "/" })}
         variant="secondary"
         className="flex items-center gap-2 w-full"
       >
@@ -16,7 +16,7 @@ function OAuthButtons() {
         Google
       </Button>
       <Button
-        onClick={() => signIn("github", { redirectTo: "/dashboard/my-habits" })}
+        onClick={() => signIn("github", { redirectTo: "/" })}
         variant="secondary"
         className="flex items-center gap-2 w-full"
       >

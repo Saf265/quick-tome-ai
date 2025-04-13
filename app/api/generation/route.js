@@ -12,7 +12,7 @@ export async function POST(req) {
     //   cible,
     // });
 
-    if (!titre || !description || !theme || !longueur) {
+    if (!titre || !description || !theme || !longueur || !cible) {
       return NextResponse.json(
         {
           error: "Tous les champs sont obligatoires.",
@@ -22,29 +22,38 @@ export async function POST(req) {
     }
 
     const prompt = `
-      Génère un ebook complet en Markdown avec le titre "${titre}".
+    Je voudrais que tu me génères un ebook en format markdown avec les caractéristiques suivantes :
 
-      Informations sur l'ebook:
-      - Description: ${description}
-      - Public cible: ${cible}
-      - Nombre de pages approximatif: ${longueur}
-      - Ton et style: ${theme}
+Titre de l'ebook : ${titre}
+Description : ${description}
+Public cible : ${cible}
+Longueur : ${longueur} (court/médium/long)
+Thème : ${theme}
 
-      Instructions de formatage Markdown:
-      - Utilise # pour le titre principal
-      - Utilise ## pour les titres de chapitres
-      - Utilise ### pour les sous-titres de sections
-      - Organise le texte en paragraphes bien structurés
-      - Utilise des listes avec * ou - quand c'est approprié
-      - Utilise **texte** pour mettre en gras les points importants
-      - Utilise > pour les citations ou points importants
-      - Ajoute une table des matières au début
-      - Utilise --- pour séparer les grandes sections
-      - N'inclus pas d'images, concentre-toi uniquement sur le texte
+L'ebook doit suivre EXACTEMENT cette structure (c'est très important pour mon système de parsing) :
 
-      Format de sortie:
-      Renvoie l'ebook directement en format Markdown, bien structuré et prêt à être converti en PDF.
-      Commence par le titre principal, suivi d'une table des matières, puis le contenu.
+Commence par le titre principal au format # ${titre}
+Continue avec une ## Introduction qui présente brièvement le sujet et annonce le contenu de l'ebook
+Organise le contenu en chapitres numérotés avec EXACTEMENT ce format : ## Chapitre 1: [Titre du chapitre], ## Chapitre 2: [Titre du chapitre], etc.
+Termine avec une ## Conclusion qui résume les points principaux
+
+Directives de longueur selon la variable ${longueur} :
+
+Si "court" : 3 chapitres, environ 1500 mots au total
+Si "médium" : 4-5 chapitres, environ 3000 mots au total
+Si "long" : 6-7 chapitres, environ 5000 mots au total
+
+Règles importantes à respecter :
+
+UTILISE EXCLUSIVEMENT les niveaux de titres indiqués pour la structure principale
+Assure-toi que chaque chapitre commence EXACTEMENT par "## Chapitre [numéro]:"
+N'ajoute PAS de sections supplémentaires comme "Références" ou "Annexes"
+Ne mets PAS de table des matières
+Chaque chapitre doit contenir du contenu substantiel adapté au ${cible}
+Inclus des listes à puces ou numérotées quand c'est pertinent
+Adapte le style et le vocabulaire au ${cible} spécifié
+
+Génère maintenant l'ebook complet basé sur ces spécifications, en respectant scrupuleusement la structure et le format indiqués.
     `;
 
     // Simulate ebook generation

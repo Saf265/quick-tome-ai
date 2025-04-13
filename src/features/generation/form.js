@@ -26,13 +26,55 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { logger } from "@/lib/logger";
 import { useLoadingStore } from "@/store/loading-store";
+import { useMarkdownStore } from "@/store/markdown-store";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import * as z from "zod";
+
+const markdownExample =
+  "# L'art du marketing digital\n" +
+  "\n" +
+  "<!-- pagebreak -->\n" +
+  "\n" +
+  "## Introduction\n" +
+  "\n" +
+  "Le marketing digital est devenu un pilier incontournable dans le monde actuel des affaires. Avec l'évolution constante des technologies et des comportements des consommateurs, il est essentiel pour toute entreprise de maîtriser les tenants et aboutissants de ce domaine. Cet ebook vise à vous guider à travers les fondamentaux de cette discipline en constante évolution.\n" +
+  "\n" +
+  "<!-- pagebreak -->\n" +
+  "\n" +
+  "## Chapitre 1 : Les bases du marketing digital\n" +
+  "\n" +
+  "Le marketing digital englobe un large éventail de stratégies et d'outils visant à promouvoir des produits ou des services en ligne. Parmi les éléments clés à maîtriser, on retrouve la création de contenu, le référencement naturel (SEO), la publicité en ligne, les réseaux sociaux, l'email marketing, etc. Chaque composante joue un rôle crucial dans la construction d'une présence en ligne efficace.\n" +
+  "\n" +
+  "### La création de contenu\n" +
+  "La création de contenu de qualité est au cœur de toute stratégie de marketing digital. Que ce soit des articles de blog, des vidéos, des infographies ou des podcasts, le contenu doit être pertinent, informatif et engageant pour attirer et fidéliser votre audience.\n" +
+  "\n" +
+  "### Le référencement naturel (SEO)\n" +
+  "Le SEO est un ensemble de techniques visant à améliorer le classement d'un site web dans les résultats des moteurs de recherche. En comprenant les bases du SEO, vous pourrez augmenter la visibilité de votre site et attirer un trafic qualifié.\n" +
+  "\n" +
+  "### La publicité en ligne\n" +
+  "La publicité en ligne offre des possibilités de ciblage précis et de mesure des performances inégalées. Que ce soit à travers Google Ads, Facebook Ads ou d'autres plateformes publicitaires, il est crucial de comprendre comment créer des campagnes efficaces et rentables.\n" +
+  "\n" +
+  "<!-- pagebreak -->\n" +
+  "\n" +
+  "## Chapitre 2 : L'analyse des données et l'optimisation des performances\n" +
+  "\n" +
+  "Le marketing digital repose sur l'analyse des données pour prendre des décisions éclairées et optimiser les performances de vos campagnes. En utilisant des outils d'analyse web et en interprétant les données correctement, vous serez en mesure d'adapter vos stratégies en temps réel pour maximiser les résultats.\n" +
+  "\n" +
+  "### Outils d'analyse web\n" +
+  "Google Analytics, Google Search Console, Facebook Insights, etc. : ces outils vous permettent de suivre et d'analyser le comportement de vos visiteurs, le trafic de votre site, les conversions, etc. Apprenez à les utiliser pour obtenir des insights précieux.\n" +
+  "\n" +
+  "### A/B testing\n" +
+  "L'A/B testing consiste à comparer deux versions d'une même page ou d'une annonce pour déterminer laquelle fonctionne le mieux. En testant différents éléments (titres, images, call-to-action, etc.), vous pourrez améliorer progressivement vos taux de conversion.\n" +
+  "\n" +
+  "<!-- pagebreak -->\n" +
+  "\n" +
+  "## Conclusion\n" +
+  "\n" +
+  "Le marketing digital offre des opportunités infinies pour les entreprises de toutes tailles. En comprenant les bases de cette discipline et en appliquant les bonnes pratiques, vous serez en mesure de développer une présence en ligne solide et de générer des résultats tangibles. Continuez d'apprendre, de tester et d'optimiser vos stratégies pour rester compétitif dans un environnement en constante évolution.";
 
 const formSchema = z.object({
   titre: z
@@ -53,6 +95,7 @@ const formSchema = z.object({
 const errorMessageClass = "min-h-[20px] text-sm text-red-500";
 
 export default function GenerationForm() {
+  const { markdown, setMarkdown } = useMarkdownStore();
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -68,7 +111,7 @@ export default function GenerationForm() {
   async function onSubmit(values) {
     try {
       setLoading(true);
-      logger.debug("Form values:", values);
+      // logger.debug("Form values:", values);
       // const response = await ky.post("/api/generation", {
       //   json: values,
       //   headers: {
@@ -77,9 +120,15 @@ export default function GenerationForm() {
       //   method: "POST",
       // });
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // useMarkdownStore().setMarkdown(markdownExample);
+      setMarkdown(markdownExample);
+      toast.success("Ebook généré avec succès !");
+
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
       // if (response.ok) {
       //   toast.success("Ebook generated successfully!");
+      //   const markdown = await response.json();
+      //   useMarkdownStore.setMarkdown(markdown);
       // } else {
       //   const error = await response.json();
       //   toast.error(error.message || "Failed to generate ebook");
@@ -89,7 +138,7 @@ export default function GenerationForm() {
       toast.error("Failed to submit the form. Please try again.");
     } finally {
       setLoading(false);
-      form.reset();
+      // form.reset();
     }
   }
 

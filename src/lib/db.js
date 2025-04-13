@@ -4,7 +4,7 @@ const globalForPrisma = global;
 
 if (!globalForPrisma.prisma) {
   globalForPrisma.prisma = new PrismaClient({
-    log: ["query", "info", "warn", "error"],
+    log: ["warn", "error"],
   });
 }
 

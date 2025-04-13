@@ -51,4 +51,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       });
     },
   },
+  callbacks: {
+    async session({ session, user }) {
+      const userDb = await prisma.user.findFirst({
+        where: {
+          id: user.id,
+        },
+        select: {
+          role: true,
+        },
+      });
+
+      session.user.role = userDb.role;
+
+      return session;
+    },
+  },
 });

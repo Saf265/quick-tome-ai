@@ -30,7 +30,7 @@ export const sendFeedback = async (feedback) => {
 export const signInResend = async (data) => {
   await signIn("resend", data);
 
-  redirect("/dashboard");
+  redirect("/");
 };
 
 export const buyAction = async () => {
